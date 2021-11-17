@@ -3,3 +3,4 @@ pandas==1.2.4
 Pyomo==6.1.2
 requests==2.25.0
 streamlit==1.2.0
+streamlit-aggrid
