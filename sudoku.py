@@ -7,25 +7,28 @@ from itertools import islice
 import os
 import logging.config
 
-# open logging configuration file
-logging.config.fileConfig('sudoku_log.config')
-# create logger
-logger = logging.getLogger('Sudoku')
-
 
 # 'application' code
 class Sudoku:
-    def __init__(self, fixed):
-        # logger.debug('debug message')
-        # logger.info('info message')
-        # logger.warning('warn message')
-        # logger.error('error message')
-        # logger.critical('critical message')
-        logger.info('Sudoku constructor')
-        self.fixed = fixed
-        self.solution = [[0] * 9 for i in range(9)]
-        self.model = self.sudoku_model()
-        self.solve()
+    # open logging configuration file
+    logging.config.fileConfig('sudoku_log.config')
+    # create self.logger
+    logger = logging.getLogger('Sudoku')
+
+    def __init__(self, fixed=None):
+        # self.logger.debug('debug message')
+        # self.logger.info('info message')
+        # self.logger.warning('warn message')
+        # self.logger.error('error message')
+        # self.logger.critical('critical message')
+
+        if fixed is not None:
+            self.logger.info('Sudoku constructor')
+            self.fixed = fixed
+            self.solution = [[0] * 9 for i in range(9)]
+            self.logger.info('Create optimization model')
+            self.model = self.sudoku_model()
+            self.solve()
 
     @staticmethod
     def sudoku_model():
@@ -34,8 +37,6 @@ class Sudoku:
         Args:
             fixed: fixed values
         """
-
-        logger.info('Create optimization model')
 
         model = pyo.ConcreteModel()
 
@@ -86,7 +87,7 @@ class Sudoku:
 
     @classmethod
     def from_rapidapi(cls, difficulty="easy"):
-        logger.info('Reading Sudoku puzzle from rapidapi')
+        cls().logger.info('Reading Sudoku puzzle from rapidapi')
 
         url = 'https://sudoku-generator1.p.rapidapi.com/sudoku/generate'
         querystring = {"difficulty": difficulty}
@@ -126,12 +127,12 @@ class Sudoku:
                 self.solution[i - 1][j - 1] = k
 
     def solve(self):
-        logger.info('Solving sudoku')
+        self.logger.info('Solving sudoku')
 
         self.decode()
         opt = SolverFactory('cbc', executable='cbc')
         opt.solve(self.model)
         self.encode()
 
-        logger.info('Sudoku solution')
+        self.logger.info('Sudoku solution')
         print(pd.DataFrame(self.solution))
